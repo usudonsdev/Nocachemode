@@ -1,11 +1,12 @@
 {
     "manifest_version": 3,
     "name": "CDN Cache Bypass (Bookmark)",
-    "version": "1.0",
+    "version": "1.1",
     "description": "ブックマークから開いたサイトにキャッシュバスターを付与し、CDNキャッシュを回避します。",
     "permissions": [
         "webNavigation",
-        "tabs"
+        "tabs",
+        "storage"
     ],
     "host_permissions": [
         "<all_urls>"
