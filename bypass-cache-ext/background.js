@@ -12,14 +12,16 @@ function saveDomains(domains, callback) {
 
 // キャッシュ無効モードの状態を取得する関数
 function getCacheBypassMode(callback) {
+    console.log('Fetching cacheBypassMode...');
     chrome.storage.sync.get(['cacheBypassMode'], (result) => {
+        if (chrome.runtime.lastError) {
+            console.error('Error accessing chrome.storage.sync:', chrome.runtime.lastError);
+            callback(false); // デフォルト値を返す
+            return;
+        }
+        console.log('cacheBypassMode result:', result);
         callback(result.cacheBypassMode || false);
     });
-}
-
-// キャッシュ無効モードを設定する関数
-function setCacheBypassMode(enabled, callback) {
-    chrome.storage.sync.set({ cacheBypassMode: enabled }, callback);
 }
 
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
@@ -40,30 +42,43 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 });
 
 chrome.webNavigation.onCommitted.addListener((details) => {
-    // メインフレーム（ページ本体）の読み込みのみ対象とする
+    console.log('onCommitted event triggered:', details);
     if (details.frameId !== 0) return;
 
+    // 特殊なスキームを無視
+    if (!details.url.startsWith('http://') && !details.url.startsWith('https://')) {
+        console.log('Ignoring non-http(s) URL:', details.url);
+        return;
+    }
+
+    console.log('Processing URL:', details.url); // デバッグ用ログを追加
+    console.log('Transition type:', details.transitionType); // Transition type を確認
+
     getCacheBypassMode((cacheBypassMode) => {
+        console.log('Cache bypass mode:', cacheBypassMode);
         if (cacheBypassMode) {
             const url = new URL(details.url);
             if (!url.searchParams.has('_upd_')) {
                 url.searchParams.set('_upd_', Date.now());
+                console.log('Updating URL with cache buster:', url.toString());
                 chrome.tabs.update(details.tabId, { url: url.toString() });
             }
             return;
         }
 
-        if (details.transitionType === 'auto_bookmark') {
-            const url = new URL(details.url);
-
-            getStoredDomains((domains) => {
-                if (domains.some(domain => url.hostname.includes(domain))) {
-                    if (!url.searchParams.has('_upd_')) {
-                        url.searchParams.set('_upd_', Date.now());
-                        chrome.tabs.update(details.tabId, { url: url.toString() });
-                    }
+        // 一時的に transitionType の条件を無効化
+        const url = new URL(details.url);
+        getStoredDomains((domains) => {
+            console.log('Stored domains:', domains);
+            if (domains.some(domain => url.hostname.includes(domain))) {
+                if (!url.searchParams.has('_upd_')) {
+                    url.searchParams.set('_upd_', Date.now());
+                    console.log('Updating URL with cache buster for domain:', url.toString());
+                    chrome.tabs.update(details.tabId, { url: url.toString() });
                 }
-            });
-        }
+            } else {
+                console.log('Domain not in stored domains, skipping:', url.hostname);
+            }
+        });
     });
 });
