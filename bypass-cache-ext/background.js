@@ -1,7 +1,8 @@
 /**
  * Normalize a domain or URL to a hostname.
- * @param {string} input
- * @returns {string|null}
+ * ドメインまたはURLをホスト名に正規化します。
+ * @param {string} input 入力されたドメインまたはURL
+ * @returns {string|null} 正規化されたホスト名、またはnull
  */
 function normalizeDomain(input) {
     const value = String(input || '').trim().toLowerCase();
@@ -18,9 +19,10 @@ function normalizeDomain(input) {
 
 /**
  * Check if a hostname matches a target domain or its subdomains.
- * @param {string} hostname
- * @param {string} domain
- * @returns {boolean}
+ * ホスト名が対象ドメインまたはそのサブドメインに一致するか判定します。
+ * @param {string} hostname ホスト名
+ * @param {string} domain 対象ドメイン
+ * @returns {boolean} 一致する場合はtrue
  */
 function isDomainMatch(hostname, domain) {
     if (!hostname || !domain) return false;
@@ -30,7 +32,8 @@ function isDomainMatch(hostname, domain) {
 
 /**
  * Get stored domains from sync storage.
- * @param {(domains: string[]) => void} callback
+ * 保存されているドメイン一覧を同期ストレージから取得します。
+ * @param {(domains: string[]) => void} callback 取得後に呼ばれるコールバック
  */
 function getStoredDomains(callback) {
     chrome.storage.sync.get(['targetDomains'], (result) => {
@@ -40,8 +43,9 @@ function getStoredDomains(callback) {
 
 /**
  * Save domains to sync storage.
- * @param {string[]} domains
- * @param {() => void} callback
+ * ドメイン一覧を同期ストレージに保存します。
+ * @param {string[]} domains 保存するドメイン配列
+ * @param {() => void} callback 保存後に呼ばれるコールバック
  */
 function saveDomains(domains, callback) {
     chrome.storage.sync.set({ targetDomains: domains }, callback);
@@ -49,7 +53,8 @@ function saveDomains(domains, callback) {
 
 /**
  * Get the cache bypass mode flag.
- * @param {(enabled: boolean) => void} callback
+ * キャッシュバイパスモードの有効/無効フラグを取得します。
+ * @param {(enabled: boolean) => void} callback 取得後に呼ばれるコールバック
  */
 function getCacheBypassMode(callback) {
     chrome.storage.sync.get(['cacheBypassMode'], (result) => {
@@ -59,8 +64,9 @@ function getCacheBypassMode(callback) {
 
 /**
  * Set the cache bypass mode flag.
- * @param {boolean} enabled
- * @param {() => void} callback
+ * キャッシュバイパスモードの有効/無効フラグを設定します。
+ * @param {boolean} enabled 有効にする場合はtrue
+ * @param {() => void} callback 設定後に呼ばれるコールバック
  */
 function setCacheBypassMode(enabled, callback) {
     chrome.storage.sync.set({ cacheBypassMode: Boolean(enabled) }, callback);
@@ -68,10 +74,11 @@ function setCacheBypassMode(enabled, callback) {
 
 /**
  * Handle messages from the popup UI.
- * @param {{action: string, domain?: string, enabled?: boolean}} message
- * @param {chrome.runtime.MessageSender} sender
- * @param {(response: {success: boolean, error?: string, domains?: string[], cacheBypassMode?: boolean}) => void} sendResponse
- * @returns {boolean|void}
+ * ポップアップUIからのメッセージを処理します。
+ * @param {{action: string, domain?: string, enabled?: boolean}} message 受信したメッセージ
+ * @param {chrome.runtime.MessageSender} sender 送信元情報
+ * @param {(response: {success: boolean, error?: string, domains?: string[], cacheBypassMode?: boolean}) => void} sendResponse 応答コールバック
+ * @returns {boolean|void} 非同期応答の場合はtrue
  */
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (sender?.id && sender.id !== chrome.runtime.id) {
@@ -130,7 +137,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 /**
  * Apply a cache buster on navigation when applicable.
- * @param {chrome.webNavigation.WebNavigationFramedCallbackDetails} details
+ * 必要に応じてナビゲーション時にキャッシュバスターを付与します。
+ * @param {chrome.webNavigation.WebNavigationFramedCallbackDetails} details ナビゲーション詳細
  */
 chrome.webNavigation.onCommitted.addListener((details) => {
     if (details.frameId !== 0) return;

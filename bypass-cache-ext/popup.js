@@ -7,8 +7,9 @@ const allModeToggle = document.getElementById('allMode');
 
 /**
  * Update the status message.
- * @param {string} message
- * @param {boolean} [isError]
+ * ステータスメッセージを更新します。
+ * @param {string} message メッセージ内容
+ * @param {boolean} [isError] エラーの場合はtrue（省略可）
  */
 function setStatus(message, isError = true) {
     status.textContent = message;
@@ -17,8 +18,9 @@ function setStatus(message, isError = true) {
 
 /**
  * Send a message to the background script.
- * @param {{action: string, domain?: string, enabled?: boolean}} payload
- * @returns {Promise<any>}
+ * バックグラウンドスクリプトへメッセージを送信します。
+ * @param {{action: string, domain?: string, enabled?: boolean}} payload 送信するデータ
+ * @returns {Promise<any>} レスポンスのPromise
  */
 function sendMessage(payload) {
     return new Promise((resolve) => {
@@ -28,7 +30,8 @@ function sendMessage(payload) {
 
 /**
  * Render the domain list.
- * @param {string[]} domains
+ * ドメイン一覧を描画します。
+ * @param {string[]} domains ドメイン配列
  */
 function renderDomains(domains) {
     domainList.innerHTML = '';
@@ -62,7 +65,8 @@ function renderDomains(domains) {
 
 /**
  * Refresh UI state from storage.
- * @returns {Promise<void>}
+ * ストレージから状態を取得しUIを更新します。
+ * @returns {Promise<void>} なし
  */
 async function refreshState() {
     const response = await sendMessage({ action: 'getState' });
@@ -78,8 +82,9 @@ async function refreshState() {
 
 /**
  * Add a domain or URL from user input.
- * @param {string} value
- * @returns {Promise<void>}
+ * ユーザー入力からドメインまたはURLを追加します。
+ * @param {string} value 入力値
+ * @returns {Promise<void>} なし
  */
 async function addDomain(value) {
     const response = await sendMessage({ action: 'addDomain', domain: value });
@@ -94,6 +99,7 @@ async function addDomain(value) {
 
 /**
  * Handle manual add button click.
+ * 手動追加ボタンのクリック処理。
  */
 addDomainButton.addEventListener('click', async () => {
     const value = domainInput.value.trim();
@@ -106,6 +112,7 @@ addDomainButton.addEventListener('click', async () => {
 
 /**
  * Handle add current site button click.
+ * 現在のサイト追加ボタンのクリック処理。
  */
 addCurrentButton.addEventListener('click', async () => {
     setStatus('');
@@ -120,7 +127,8 @@ addCurrentButton.addEventListener('click', async () => {
 
 /**
  * Handle all-URL mode toggle.
- * @param {Event} event
+ * 全URLモードのトグル切り替え処理。
+ * @param {Event} event イベントオブジェクト
  */
 allModeToggle.addEventListener('change', async (event) => {
     const enabled = event.target.checked;
@@ -134,5 +142,6 @@ allModeToggle.addEventListener('change', async (event) => {
 
 /**
  * Initialize UI state.
+ * UIの初期状態を設定します。
  */
 refreshState();
